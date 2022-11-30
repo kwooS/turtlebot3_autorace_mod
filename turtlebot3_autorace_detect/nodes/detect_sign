@@ -54,7 +54,7 @@ class DetectSign():
 
         self.cvBridge = CvBridge()
 
-        self.TrafficSign = Enum('TrafficSign', 'divide stop parking tunnel')
+        self.TrafficSign = Enum('TrafficSign', 'one two three four five six seven eight nine zero')
 
         self.counter = 1
 
@@ -66,13 +66,28 @@ class DetectSign():
         dir_path = dir_path.replace('turtlebot3_autorace_detect/nodes', 'turtlebot3_autorace_detect/')
         dir_path += 'file/detect_sign/'
 
-        self.img2 = cv2.imread(dir_path + 'stop.png',0)         # trainImage1
-        self.img3 = cv2.imread(dir_path + 'parking.png',0)      # trainImage2
-        self.img4 = cv2.imread(dir_path + 'tunnel.png',0)       # trainImage3
+        self.img1 = cv2.imread(dir_path + 'one.png',0)         
+        self.img2 = cv2.imread(dir_path + 'two.png',0)     
+        self.img3 = cv2.imread(dir_path + 'three.png',0)      
+        self.img4 = cv2.imread(dir_path + 'four.png',0)  
+        self.img5 = cv2.imread(dir_path + 'five.png',0)  
+        self.img6 = cv2.imread(dir_path + 'six.png',0)  
+        self.img7 = cv2.imread(dir_path + 'seven.png',0)  
+        self.img8 = cv2.imread(dir_path + 'eight.png',0)  
+        self.img9 = cv2.imread(dir_path + 'nine.png',0)  
+        self.img0 = cv2.imread(dir_path + 'zero.png',0)   
 
+        self.kp1, self.des1 = self.sift.detectAndCompute(self.img1,None)
         self.kp2, self.des2 = self.sift.detectAndCompute(self.img2,None)
         self.kp3, self.des3 = self.sift.detectAndCompute(self.img3,None)
         self.kp4, self.des4 = self.sift.detectAndCompute(self.img4,None)
+        self.kp5, self.des5 = self.sift.detectAndCompute(self.img5,None)
+        self.kp6, self.des6 = self.sift.detectAndCompute(self.img6,None)
+        self.kp7, self.des7 = self.sift.detectAndCompute(self.img7,None)
+        self.kp8, self.des8 = self.sift.detectAndCompute(self.img8,None)
+        self.kp9, self.des9 = self.sift.detectAndCompute(self.img9,None)
+        self.kp0, self.des0 = self.sift.detectAndCompute(self.img0,None)
+        
 
         FLANN_INDEX_KDTREE = 0
         index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
@@ -106,51 +121,51 @@ class DetectSign():
         MIN_MSE_DECISION = 50000
 
         # find the keypoints and descriptors with SIFT
-        kp1, des1 = self.sift.detectAndCompute(cv_image_input,None)
+        kp, des = self.sift.detectAndCompute(cv_image_input,None)
 
-        matches2 = self.flann.knnMatch(des1,self.des2,k=2)
-        matches3 = self.flann.knnMatch(des1,self.des3,k=2)
-        matches4 = self.flann.knnMatch(des1,self.des4,k=2)
+        matches2 = self.flann.knnMatch(des,self.des1,k=2)
+        matches3 = self.flann.knnMatch(des,self.des2,k=2)
+        matches4 = self.flann.knnMatch(des,self.des3,k=2)
 
-        image_out_num = 1
+        image_out_num = 0
 
-        good2 = []
+        good1 = []
         for m,n in matches2:
             if m.distance < 0.7*n.distance:
-                good2.append(m)
+                good1.append(m)
 
-        if len(good2)>MIN_MATCH_COUNT:
-            src_pts = np.float32([ kp1[m.queryIdx].pt for m in good2 ]).reshape(-1,1,2)
-            dst_pts = np.float32([ self.kp2[m.trainIdx].pt for m in good2 ]).reshape(-1,1,2)
+        if len(good1)>MIN_MATCH_COUNT:
+            src_pts = np.float32([ kp[m.queryIdx].pt for m in good1 ]).reshape(-1,1,2)
+            dst_pts = np.float32([ self.kp1[m.trainIdx].pt for m in good1 ]).reshape(-1,1,2)
 
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-            matchesMask2 = mask.ravel().tolist()
+            matchesmask1 = mask.ravel().tolist()
 
             mse = self.fnCalcMSE(src_pts, dst_pts)
             if mse < MIN_MSE_DECISION:
                 msg_sign = UInt8()
-                msg_sign.data = self.TrafficSign.stop.value
+                msg_sign.data = self.TrafficSign.one.value
 
                 self.pub_traffic_sign.publish(msg_sign)
 
-                rospy.loginfo("TrafficSign 2")
+                rospy.loginfo("Number 1")
 
-                image_out_num = 2
+                image_out_num = 1
 
         else:
-            matchesMask2 = None
+            matchesMask1 = None
 
-        good3 = []
+        good2 = []
         for m,n in matches3:
             if m.distance < 0.7*n.distance:
-                good3.append(m)
+                good2.append(m)
 
-        if len(good3)>MIN_MATCH_COUNT:
-            src_pts = np.float32([ kp1[m.queryIdx].pt for m in good3 ]).reshape(-1,1,2)
-            dst_pts = np.float32([ self.kp3[m.trainIdx].pt for m in good3 ]).reshape(-1,1,2)
+        if len(good2)>MIN_MATCH_COUNT:
+            src_pts = np.float32([ kp[m.queryIdx].pt for m in good2 ]).reshape(-1,1,2)
+            dst_pts = np.float32([ self.kp2[m.trainIdx].pt for m in good2 ]).reshape(-1,1,2)
 
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-            matchesMask3 = mask.ravel().tolist()
+            matchesMask2 = mask.ravel().tolist()
 
             mse = self.fnCalcMSE(src_pts, dst_pts)
             if mse < MIN_MSE_DECISION:
@@ -164,18 +179,18 @@ class DetectSign():
                 image_out_num = 3
 
         else:
-            matchesMask3 = None
+            matchesMask2 = None
 
-        good4 = []
+        good3 = []
         for m,n in matches4:
             if m.distance < 0.7*n.distance:
-                good4.append(m)
-        if len(good4)>MIN_MATCH_COUNT:
-            src_pts = np.float32([ kp1[m.queryIdx].pt for m in good4 ]).reshape(-1,1,2)
-            dst_pts = np.float32([ self.kp4[m.trainIdx].pt for m in good4 ]).reshape(-1,1,2)
+                good3.append(m)
+        if len(good3)>MIN_MATCH_COUNT:
+            src_pts = np.float32([ kp[m.queryIdx].pt for m in good3 ]).reshape(-1,1,2)
+            dst_pts = np.float32([ self.kp3[m.trainIdx].pt for m in good3 ]).reshape(-1,1,2)
 
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-            matchesMask4 = mask.ravel().tolist()
+            matchesMask3 = mask.ravel().tolist()
 
             mse = self.fnCalcMSE(src_pts, dst_pts)
             if mse < MIN_MSE_DECISION:
@@ -189,7 +204,7 @@ class DetectSign():
                 image_out_num = 4
 
         else:
-            matchesMask4 = None
+            matchesMask3 = None
 
         if image_out_num == 1:
             if self.pub_image_type == "compressed":
@@ -203,10 +218,10 @@ class DetectSign():
         elif image_out_num == 2:
             draw_params2 = dict(matchColor = (0,0,255), # draw matches in green color
                             singlePointColor = None,
-                            matchesMask = matchesMask2, # draw only inliers
+                            matchesMask = matchesmask1, # draw only inliers
                             flags = 2)
 
-            final2 = cv2.drawMatches(cv_image_input,kp1,self.img2,self.kp2,good2,None,**draw_params2)
+            final2 = cv2.drawMatches(cv_image_input,kp,self.img1,self.kp1,good1,None,**draw_params2)
 
             if self.pub_image_type == "compressed":
                 # publishes traffic sign image in compressed type
@@ -219,10 +234,10 @@ class DetectSign():
         elif image_out_num == 3:
             draw_params3 = dict(matchColor = (255,0,0), # draw matches in green color
                             singlePointColor = None,
-                            matchesMask = matchesMask3, # draw only inliers
+                            matchesMask = matchesMask2, # draw only inliers
                             flags = 2)
 
-            final3 = cv2.drawMatches(cv_image_input,kp1,self.img3,self.kp3,good3,None,**draw_params3)
+            final3 = cv2.drawMatches(cv_image_input,kp,self.img2,self.kp2,good2,None,**draw_params3)
 
             if self.pub_image_type == "compressed":
                 # publishes traffic sign image in compressed type
@@ -235,10 +250,10 @@ class DetectSign():
         elif image_out_num == 4:
             draw_params4 = dict(matchColor = (255,0,0), # draw matches in green color
                             singlePointColor = None,
-                            matchesMask = matchesMask4, # draw only inliers
+                            matchesMask = matchesMask3, # draw only inliers
                             flags = 2)
 
-            final4 = cv2.drawMatches(cv_image_input,kp1,self.img4,self.kp4,good4,None,**draw_params4)
+            final4 = cv2.drawMatches(cv_image_input,kp,self.img3,self.kp3,good3,None,**draw_params4)
 
             if self.pub_image_type == "compressed":
                 # publishes traffic sign image in compressed type
@@ -255,22 +270,3 @@ if __name__ == '__main__':
     rospy.init_node('detect_sign')
     node = DetectSign()
     node.main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

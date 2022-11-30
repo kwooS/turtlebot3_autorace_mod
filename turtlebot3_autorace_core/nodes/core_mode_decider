@@ -36,7 +36,7 @@ class CoreModeDecider():
         self.pub_decided_mode = rospy.Publisher('/core/decided_mode', UInt8, queue_size=1)
 
         self.InvokedObject = Enum('InvokedObject', 'traffic_sign traffic_light')
-        self.TrafficSign = Enum('TrafficSign', 'divide stop parking tunnel')
+        self.TrafficSign = Enum('TrafficSign', 'one two three four five six seven eight nine zero')
         self.CurrentMode = Enum('CurrentMode', 'idle lane_following traffic_light parking_lot level_crossing tunnel')
 
         self.fnInitMode()
