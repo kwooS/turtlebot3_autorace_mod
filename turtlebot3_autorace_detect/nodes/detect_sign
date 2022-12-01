@@ -29,6 +29,8 @@ from std_msgs.msg import UInt8
 from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 
+import easyocr
+
 class DetectSign():
     def __init__(self):
         self.fnPreproc()
@@ -66,35 +68,19 @@ class DetectSign():
         dir_path = dir_path.replace('turtlebot3_autorace_detect/nodes', 'turtlebot3_autorace_detect/')
         dir_path += 'file/detect_sign/'
         
-        self.img = []
-        self.kps = []
-        self.dess = 
-        img_dir_name = ['one.png', 'two.png', 'three.png', 'four.png', 'five.png', 'six.png', 'seven.png', 'eight.png', 'nine.png', 'zero.png']
-        for i in range(10):
-            self.img.append(cv2.imread(dir_path + img_dir_name[i],0))
+        self.reader = easyocr.Reader(['en'], gpu=False)
+        
+        self.img1 = self.reader(dir_path + 'one.png',0)
+        
+        self.img.append(cv2.imread(dir_path + img_dir_name[i],0))
             
         self.img1 = cv2.imread(dir_path + 'one.png',0)         
         self.img2 = cv2.imread(dir_path + 'two.png',0)     
         self.img3 = cv2.imread(dir_path + 'three.png',0)      
-        self.img4 = cv2.imread(dir_path + 'four.png',0)  
-        self.img5 = cv2.imread(dir_path + 'five.png',0)  
-        self.img6 = cv2.imread(dir_path + 'six.png',0)  
-        self.img7 = cv2.imread(dir_path + 'seven.png',0)  
-        self.img8 = cv2.imread(dir_path + 'eight.png',0)  
-        self.img9 = cv2.imread(dir_path + 'nine.png',0)  
-        self.img0 = cv2.imread(dir_path + 'zero.png',0)   
 
         self.kp1, self.des1 = self.sift.detectAndCompute(self.img1,None)
         self.kp2, self.des2 = self.sift.detectAndCompute(self.img2,None)
         self.kp3, self.des3 = self.sift.detectAndCompute(self.img3,None)
-        self.kp4, self.des4 = self.sift.detectAndCompute(self.img4,None)
-        self.kp5, self.des5 = self.sift.detectAndCompute(self.img5,None)
-        self.kp6, self.des6 = self.sift.detectAndCompute(self.img6,None)
-        self.kp7, self.des7 = self.sift.detectAndCompute(self.img7,None)
-        self.kp8, self.des8 = self.sift.detectAndCompute(self.img8,None)
-        self.kp9, self.des9 = self.sift.detectAndCompute(self.img9,None)
-        self.kp0, self.des0 = self.sift.detectAndCompute(self.img0,None)
-        
 
         FLANN_INDEX_KDTREE = 0
         index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
@@ -124,6 +110,9 @@ class DetectSign():
         elif self.sub_image_type == "raw":
             cv_image_input = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
 
+        read_number = self.reader.readtext(cv_image_input)
+        if 
+
         MIN_MATCH_COUNT = 9
         MIN_MSE_DECISION = 50000
 
@@ -150,6 +139,7 @@ class DetectSign():
 
             mse = self.fnCalcMSE(src_pts, dst_pts)
             if mse < MIN_MSE_DECISION:
+                ## 이런식으로 메시지 publish 
                 msg_sign = UInt8()
                 msg_sign.data = self.TrafficSign.one.value
 
